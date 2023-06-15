@@ -1,0 +1,21 @@
+use("sample_training")
+
+// db.trips.distinct("bikeid")
+
+const bike = 17460
+var record = db.trips.findOne({bikeid: bike})
+var temp = record
+
+while(temp!=null) {
+    record = temp
+    print(record["end station name"])
+    temp = null
+    temp = db.trips.findOne(
+        {
+            "start time": {$gte: record["stop time"]},
+            "start station id": record["end station id"]
+        }
+    )
+}
+// availableStation = record["end station id"]
+// print(availableStation)

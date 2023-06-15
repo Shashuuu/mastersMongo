@@ -1,0 +1,50 @@
+use("sample_training")
+
+db.temporary.drop()
+
+var a = db.trips.distinct("start station id")
+var b = db.trips.distinct("end station id")
+
+var b_not_a = b.filter(i=>!a.includes(i))
+
+var aUb = [...new Set(a.concat(b))].sort(function(a,b) {return a-b})
+
+a.forEach(function(i) {
+  var entry = db.trips.findOne(
+    {"start station id": i},
+    {_id: 0, stationId: "$start station id", stationName: "$start station name"}
+  )
+  db.temporary.insertOne(entry)
+})
+b_not_a.forEach(function(j) {
+  var entry = db.trips.findOne(
+    {"end station id": j},
+    {_id: 0, stationId: "$end station id", stationName: "$end station name"}
+  )
+  db.temporary.insertOne(entry)
+})
+db.temporary.find().count()
+
+
+use("sample_training")
+
+db.stations.drop()
+
+var stationList = db.temporary.distinct("stationName")
+
+stationList.forEach(function(station) {
+  var entry = db.temporary.findOne(
+    {stationName: station},
+    {_id: 0, stationId: 1, stationName: 1}
+  )
+  db.stations.insertOne(entry)
+})
+
+db.temporary.drop()
+
+db.stations.find().count()
+
+
+// var a = db.trips.findOne()
+// print(a["start time"])
+// print(a["start time"].toString())

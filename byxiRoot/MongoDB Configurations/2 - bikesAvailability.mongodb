@@ -1,0 +1,34 @@
+use("sample_training")
+
+var bikes = db.trips.distinct("bikeid")
+// print(bikes.length)
+// print(bikes)
+
+var record, temp
+
+// var array = []
+
+db.stations.updateMany({},{$set: {availableBikes: []}})
+
+bikes.forEach(function(bikeId) {
+
+  record = db.trips.findOne({bikeid: bikeId})
+  temp = record
+
+  while(temp!=null) {
+      record = temp
+      // print(record["end station name"])
+      temp = null
+      temp = db.trips.findOne(
+          {
+              "start time": {$gte: record["stop time"]},
+              "start station id": record["end station id"]
+          }
+      )
+  }
+  availableStation = record["end station id"]
+  db.stations.updateOne(
+    {stationId: availableStation},
+    {$push: {availableBikes: bikeId}}
+  )
+})

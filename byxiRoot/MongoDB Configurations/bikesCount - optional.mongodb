@@ -1,0 +1,9 @@
+use("sample_training")
+
+var cursor = db.stations.find()
+var count = 0
+
+cursor.forEach(function(station) {
+  count += station["availableBikes"].length
+})
+print(count)
